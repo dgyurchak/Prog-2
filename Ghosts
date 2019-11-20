@@ -1,0 +1,91 @@
+//https://it.inf.unideb.hu/honlap/prog2/ghosts
+
+//loader
+package shell;
+
+public class Loader {
+    public static Shell load(){
+        return new GhostShell();
+    }
+}
+
+//ghostshell
+package shell;
+
+public class GhostShell extends Shell {
+
+    boolean isstarted;
+    boolean isday = false;
+    boolean issinging;
+    boolean islaughing;
+    boolean ishoot;
+    boolean isopen = false;
+    boolean playorgan = false;
+    int count = 0;
+    StringBuilder game = new StringBuilder();
+
+    public String status(){
+        StringBuilder sb = new StringBuilder();
+        if (count == 3){
+            isstarted = false;
+            return "Megnyerted a jatekot!";
+        }
+        sb.append(isday ? "Nappal van. " : "Éjszaka van. ");
+        if (isday){
+            sb.append(issinging ? "Éneklő énekelt. " : "Éneklő csendben volt. ")
+                    .append(islaughing ? "Kacagó kacagott. " : "Kacagó csendben volt. ")
+                    .append(ishoot ? "Huhogó huhogott. " : "Huhogó csendben volt").append("\n");
+            sb.append(isopen ? "Az ablak nyitva van. " : "Az ablak zárva van. ")
+                    .append(playorgan ? "Ma már orgonáltál. " : "Ma még nem orgonáltál. ").append("\n");
+        }
+        else{
+            sb.append(issinging ? "Éneklő énekel. " : "Éneklő csendben van. ")
+                    .append(islaughing ? "Kacagó kacag. " : "Kacagó csendben van. ")
+                    .append(ishoot ? "Huhogó huhog. " : "Huhogó csendben van").append("\n");
+        }
+        return sb.toString();
+    }
+
+    public GhostShell() {
+        addCommand(new Command("new") {
+            @Override
+            public boolean execute(String... strings) {
+                if(strings.length != 0){
+                    return false;
+                }
+                isstarted = true;
+                issinging = isSinging();
+                islaughing = isLaughing();
+                ishoot = isHooting();
+                format(status());
+                game.append(status());
+                return true;
+            }
+        });
+
+        addCommand(new Command("go") {
+            @Override
+            public boolean execute(String... strings) {
+                if (strings.length != 2 || !(strings[0].equals("to")) || !(strings[1].equals("bed"))){
+                    return false;
+                }
+                if (!isday || !isstarted){
+                    return false;
+                }
+
+                boolean sang = issinging;
+                boolean laught = islaughing;
+                boolean hooted = ishoot;
+                issinging = (playorgan && (laught == false)) ? !sang : sang;
+                islaughing = isopen ? !hooted : hooted;
+                ishoot = hooted ? laught : !laught;
+                isday = false;
+                playorgan = false;
+                format(status());
+                game.append(status());
+                return true;
+            }
+        });
+    }
+}
+
