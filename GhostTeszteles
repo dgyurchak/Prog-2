@@ -1,0 +1,229 @@
+https://search.maven.org/search?q=g:org.junit.jupiter%20AND%20v:5.5.2   az osszes kiveve a harmadik aztan a platformrol az utolso
+
+//AbstractMethod
+package Method;
+
+public abstract class AbstractMethod {
+
+    public abstract boolean newGame(Ghost gh, String... strings);
+
+    public abstract boolean newGameWithParameter(Ghost gh, String... strings);
+
+    public abstract boolean getUp(Ghost gh, String... strings);
+
+    public abstract boolean goToBed(Ghost gh, String... strings);
+
+    public abstract boolean openWindow(Ghost gh, String... strings);
+
+    public abstract boolean closeWindow(Ghost gh, String... strings);
+
+    public abstract boolean playOrgan(Ghost gh, String... strings);
+}
+
+//GhostMethod
+
+package Method;
+
+public class GhostMethod extends AbstractMethod {
+    @Override
+    public boolean newGame(Ghost gh, String... strings) {
+        /*try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+        if (strings.length != 0){
+            return false;
+        }
+        gh.isstarted = true;
+        gh.issinging = true;
+        gh.ishoot = true;
+        gh.islaughing = true;
+        gh.count = 0;
+        return true;
+    }
+
+    @Override
+    public boolean newGameWithParameter(Ghost gh, String... strings) {
+        if (strings.length != 1 || !strings[0].equals("initial")){
+            return false;
+        }
+        gh.isstarted = true;
+        gh.issinging = true;
+        gh.ishoot = true;
+        gh.islaughing = true;
+        gh.count = 0;
+        return true;
+    }
+
+    @Override
+    public boolean getUp(Ghost gh, String... strings) {
+        return false;
+    }
+
+    @Override
+    public boolean goToBed(Ghost gh, String... strings) {
+        return false;
+    }
+
+    @Override
+    public boolean openWindow(Ghost gh, String... strings) {
+        if (strings.length != 1 || !strings[0].equals("window")){
+            return false;
+        }
+        if (!gh.isday || gh.isopen){
+            return false;
+        }
+        gh.isopen = true;
+        return true;
+    }
+
+    @Override
+    public boolean closeWindow(Ghost gh, String... strings) {
+        return false;
+    }
+
+    @Override
+    public boolean playOrgan(Ghost gh, String... strings) {
+        return false;
+    }
+}
+
+//GhostMethodTest
+import Method.Ghost;
+import Method.GhostMethod;
+//import com.sun.org.apache.xpath.internal.operations.String;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.time.Duration;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class GhostMethodTest {
+
+    @Test
+    void newGame() {
+        GhostMethod gm = new GhostMethod();
+        Ghost gh = new Ghost();
+        boolean result = gm.newGame(gh);
+        assertEquals(true, result);
+    }
+
+    @Test
+    void newGameWithParameter() {
+        GhostMethod gm = new GhostMethod();
+        Ghost gh = new Ghost();
+        boolean result = gm.newGameWithParameter(gh, "initial");
+        assertEquals(true, result);
+    }
+
+    @Test
+    void newGameTime() {
+        GhostMethod gm = new GhostMethod();
+        Ghost gh = new Ghost();
+
+       assertTimeout(Duration.ofMillis(1000), () -> gm.newGame(gh));
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void newGameWithParameter2(Ghost gh, boolean expected, String... strings){
+        GhostMethod gm = new GhostMethod();
+        boolean result = gm.newGameWithParameter(gh, strings);
+        assertEquals(expected, result);
+    }
+
+    static Stream<Arguments> newGameWithParameter2(){
+        return Stream.of(
+                Arguments.arguments(new Ghost(), true, new String[]{"initial"}),
+                Arguments.arguments(new Ghost(), false, new String[]{}),
+                Arguments.arguments(new Ghost(), false, new String[]{"valami", "más"})
+        );
+    }
+
+    @ParameterizedTest
+    @CsvSource({"true, initial", "false, valami", "false, valami:mas"})
+    void newGameWithParameter2(boolean expected, String parameter){
+        GhostMethod gm = new GhostMethod();
+        Ghost gh = new Ghost();
+        String[] strings = parameter.split(":");
+        boolean result = gm.newGameWithParameter(gh, strings);
+        assertEquals(expected, result);
+    }
+
+    @ParameterizedTest
+    @CsvFileSource(resources = "test.csv", numLinesToSkip = 1)
+    void newGameWithParameter3(boolean expected, String parameter) {
+        GhostMethod gm = new GhostMethod();
+        Ghost gh = new Ghost();
+        String[] strings = parameter.split(":");
+        boolean result = gm.newGameWithParameter(gh, strings);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void openWindow() {
+        GhostMethod gm = new GhostMethod();
+        Ghost gh = new Ghost();
+        gh.isday = true;
+        gh.isopen = false;
+        boolean result = gm.openWindow(gh, "window");
+        assertEquals(true, result);
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void openWindow2(Ghost gh, boolean expected, String... strings){
+        GhostMethod gm = new GhostMethod();
+        gh.isday = true;
+        gh.isopen = false;
+        boolean result = gm.openWindow(gh,strings);
+        assertEquals(expected,result);
+    }
+
+    static Stream<Arguments> openWindow2(){
+        return Stream.of(
+                Arguments.arguments(new Ghost(), true, new String[]{"window"}),
+                Arguments.arguments(new Ghost(), false, new String[]{"valami"}),
+                Arguments.arguments(new Ghost(), true, new String[]{})
+        );
+    }
+
+    @ParameterizedTest
+    @CsvSource({"true,window","false,valami","false,valami:mas"})
+    void openWindow3(boolean expected, String parameter){
+        GhostMethod gm = new GhostMethod();
+        Ghost gh = new Ghost();
+        gh.isday = true;
+        gh.isopen = false;
+        String[] strings = parameter.split(":");
+        boolean result = gm.openWindow(gh,strings);
+        assertEquals(expected,result);
+    }
+}
+
+//Ghost
+
+package Method;
+
+public class Ghost {
+
+    public boolean isstarted = false;
+    public boolean isday = false;
+    public boolean issinging;
+    public boolean islaughing;
+    public boolean ishoot;
+    public boolean isopen = false;
+    public boolean playorgan = false;
+    public int count;
+
+    public Ghost(){
+
+    }
+}
