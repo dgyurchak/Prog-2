@@ -27,8 +27,21 @@ namespace PrintExample
         static void Main(string[] args)
         {
         }
+
+        public static int[] JumpingNumberOne(int[] input)
+        {
+            int[] result = new int[input.Length];
+            for(int i = 0; i < input.Length; i++)
+            {
+                if(input[i] == i && input[i + 2] == 0)
+                {
+                    result[i] = 0;
+                }
+            }
+        }
     }
 }
+
 
 //Teszteles
 
@@ -38,6 +51,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PrintExample.Tests
@@ -46,8 +60,10 @@ namespace PrintExample.Tests
     public class ProgramTests
     {
         [TestMethod()]
+        [Timeout(2000)]  //idokorlat (ms) ha ennyi ido alatt lefut a teszt akkor siker
         public void isPrimeTest()
         {
+            Thread.Sleep(2500);
             // Arrange (Elokeszites)
             int number = 11;
             bool expected = true;
@@ -131,8 +147,55 @@ namespace PrintExample.Tests
             Assert.AreEqual(expected, result);
         }
 
-        public TestContext TC { get; set; }
+        public TestContext TestContext { get; set; }
 
+        [TestMethod]
+        [DataSource("Microsoft.VidualStudio.TestTools.DataSource.CSV",
+            @"data\primetests.csv",
+            "frogs#csv",    //fajlnev
+            DataAccessMethod.Sequential)]  
+        public void TestFrogWithCsvfile()
+        {
+            string expectedlString = TestContext.DataRow["original"].ToString();
+            int[] expected = new int[resultString.length];
+            for(int i = 0; i < expected.Length; i++)
+            {
+                switch (originalString[i])
+                {
+                    case 'X':
+                        expected[i] = 2;
+                        break
+                }
+            }
+        }
+
+
+        public void TestWithMethod(int n, bool expected)
+        {
+            //arrange
+            int n = Convert.ToInt32(TestContext.DataRow["result"].ToString());
+            //Act
+            bool result = Program.isPrime(n);
+            //assert
+            Assert.AreEqual(expected, result);
+        }
+
+        //bekas feladathoz pelda teszteles
+
+        [DataRow(new int[] { 1, 2, 0, 1, 2 }, new int[] { 0, 2, 1, 1, 2 })]
+        [DataTestMethod]
+        [Timeout(2000)]
+        public void TestWithArrays(int[] input, int[] expected)
+        {
+            //arrange
+            //act
+            int[] result = Program.JumpingNumberOne(input);
+            //assert
+            for(int i = 0; i < expected.Length; i++)
+            {
+                Assert.AreEqual(expected[i], result[i]);
+            }
+
+        }
 
     }
-}
