@@ -1,0 +1,203 @@
+//Frog
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace JumpingTest
+{
+    public class Frog
+    {
+
+        public bool isstrarted;
+        public int db;
+        public string[] status;
+
+        public Frog()
+        {
+        }
+    }
+}
+
+//JumpingMethod
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace JumpingTest
+{
+    public class JumpingMethod : Program
+    {
+        public override bool IJump(Frog fr, string[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool NewGame(Frog fr, string[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool NewGameWithParameter(Frog fr, string[] args)
+        {
+            if(args.Length != 1)
+            {
+                return false;
+            }
+            int res;
+            int.TryParse(args[0], out res);  //1 param string 2 ahova szeretnenk az int tipust menteni
+            if(res == null || res <= 0)
+            {
+                return false;
+            }
+            fr.status = new string[res * 2 + 1];
+            for(int i = 0, j = res*2; i < j; i++, j--)
+            {
+                fr.status[i] = "X";
+                fr.status[j] = "O";
+            }
+            fr.status[res] = "_";
+            return true;
+        }
+
+        public override bool OWalk(Frog fr, string[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool XJump(Frog fr, string[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool XWalk(Frog fr, string[] args)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+
+//JumpingMethofTest
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using JumpingTest;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace JumpingTest.Tests
+{
+    [TestClass()]
+    public class JumpingMethodTests
+    {
+        [TestMethod()]
+        public void NewGameWithParameterTest()
+        {
+            JumpingMethod jm = new JumpingMethod();
+            bool result = jm.NewGameWithParameter(new Frog(), new string[] { "3" });
+            Assert.AreEqual(true, result);
+
+        }
+
+        [DataTestMethod]
+        [DataRow(new string[] { "3" }, true)]
+        [DataRow(new string[] { "alma" }, false)]
+        [DataRow(new string[] { "2", "3" }, false)]
+        public void NewGameWithParameterTest2(string[] args, bool expected)
+        {
+            JumpingMethod jm = new JumpingMethod();
+            bool result = jm.NewGameWithParameter(new Frog(), args);
+            Assert.AreEqual(expected, result);
+        }
+
+        public static IEnumerable<object[]> GetData()
+        {
+            yield return new object[] { new string[] { "3" }, true };
+            yield return new object[] { new string[] { "alma" }, false };
+            yield return new object[] { new string[] { "3", "alma" }, false };
+
+        }
+
+        [DataTestMethod]
+        [DynamicData(nameof(GetData), DynamicDataSourceType.Method)]
+        public void NewGameWithParameterTest3(string[] args, bool expected)
+        {
+            JumpingMethod jm = new JumpingMethod();
+            bool result = jm.NewGameWithParameter(new Frog(), args);
+            Assert.AreEqual(expected, result);
+        }
+
+        public int MyProperty { get; set; }
+        public static IEnumerable<object[]> Data {
+
+            get
+            {
+                yield return new object[] { new string[] { "3" }, true };
+                yield return new object[] { new string[] { "alma" }, false };
+            }
+        }
+
+        [DataTestMethod]
+        [DynamicData(nameof(Data), DynamicDataSourceType.Property)]
+        public void NewGameWithParameterTest4(string[] args, bool expected)
+        {
+            JumpingMethod jm = new JumpingMethod();
+            bool result = jm.NewGameWithParameter(new Frog(), args);
+            Assert.AreEqual(expected, result);
+        }
+
+        public TestContext TestContext  { get; set; }
+
+        [DataTestMethod]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV",
+            @"Data\data.csv", "data#csv", DataAccessMethod.Sequential
+            )]
+        public void NewGameWithParameterTest5()
+        {
+            JumpingMethod jm = new JumpingMethod();
+            string parameter = Convert.ToString(TestContext.DataRow["parameter"].ToString());
+            string[] args = parameter.Split(':');
+            bool expected = Convert.ToBoolean(TestContext.DataRow["expected"].ToString());
+            bool result = jm.NewGameWithParameter(new Frog(), args);
+            Assert.AreEqual(expected, result);
+        }
+    }
+}
+
+//absztrakt osztaly
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace JumpingTest
+{
+    public abstract class Program
+    {
+        static void Main(string[] args)
+        {
+        }
+
+        public abstract bool NewGame(Frog fr, string[] args);
+
+        public abstract bool NewGameWithParameter(Frog fr, string[] args);
+
+        public abstract bool XWalk(Frog fr, string[] args);
+
+        public abstract bool XJump(Frog fr, string[] args);
+
+        public abstract bool OWalk(Frog fr, string[] args);
+
+        public abstract bool IJump(Frog fr, string[] args);
+
+
+    }
+}
