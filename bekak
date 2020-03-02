@@ -1,0 +1,182 @@
+//https://arato.inf.unideb.hu/kosa.mark/prog2/
+
+using JumpingFrogs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace jatekgyd
+{
+    class JFShell : Shell
+    {
+        public bool isStarted = false;
+        public int db;
+        public WaterLilyStatus[] status;
+
+        bool IsWin()
+        {
+            for (int i = 0, j = db*2; i<j; i++, j--)
+            {
+                if(!status[i].Equals(WaterLilyStatus.TREE_FROG) || !status[j].Equals(WaterLilyStatus.TOAD))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public string Status()
+        {
+            string now = string.Join(" ", status.Select(p => { return p.Equals(WaterLilyStatus.TOAD) ? "X" : (p.Equals(WaterLilyStatus.TREE_FROG) ? "O" : "_"); }));
+            if (IsWin())
+            {
+                isStarted = false;
+                return now + "\n" + "Megnyerted a játékot!";
+            }
+            return now + "\n";
+        }
+
+        class New : Command
+        {
+            JFShell jf;
+
+            public New(JFShell jf) : base("new")
+            {
+                this.jf = jf;
+            }
+
+            public override bool Execute(params string[] args)
+            {
+                if (args.Length != 0)
+                {
+                    return false;
+                }
+                jf.isStarted = true;
+                jf.db = 3;                      //hany bekaval induljon
+                jf.status = new WaterLilyStatus[jf.db * 2 + 1];         //tomb ami tarolja a bekakat
+                for (int i = 0, j = jf.db * 2; i < j; i++, j--)
+                {
+                    jf.status[i] = WaterLilyStatus.TOAD;
+                    jf.status[j] = WaterLilyStatus.TREE_FROG;
+                }
+                jf.status[jf.db] = WaterLilyStatus.FREE;
+                jf.Format(jf.Status());         //
+                return true;            //vegre tudtuk hajtani a kommandot
+            }
+        }
+        class NewWithP : Command
+        {
+
+            private JFShell jf;
+
+            public NewWithP(JFShell jf) : base("new")     //new azt jelenti h milyen szo beirasakor induljon a jatek
+            {
+                this.jf = jf;
+            }
+
+            public override bool Execute(params string[] args)
+            {
+                if (args.Length != 1 || !(int.Parse(args[0]) > 0))   // megvizsgaljuk azokat az eseteket 
+                {
+                    return false;                               //amiker nem akarjuk h elinduljon a jatek
+                }
+                jf.isStarted = true;        //uj jatek inditasa
+                jf.db = int.Parse(args[0]);     //felhasznalo adja meg a bekak szamat
+                jf.status = new WaterLilyStatus[jf.db * 2 + 1];
+                for (int i = 0, j = jf.db * 2; i < j; i++, j--)
+                {
+                    jf.status[i] = WaterLilyStatus.TOAD;
+                    jf.status[j] = WaterLilyStatus.TREE_FROG;
+                }
+                jf.status[jf.db] = WaterLilyStatus.FREE;
+                jf.Format(jf.Status());
+                return true;
+
+
+            }
+            
+
+            
+        }
+        public class XWalk : Command
+        {
+            private JFShell jf;
+
+            public XWalk(JFShell jf) : base("X")
+            {
+                this.jf = jf;
+            }
+            public override bool Execute(params string[] args)
+            {
+                if (args.Length != 1 || !(args[0].Equals("walk")))
+                {
+                    return false;
+                }
+                for (int i = 0; i < jf.status.Length - 1; i++)
+                {
+
+                    if (jf.status[i].Equals(WaterLilyStatus.TOAD) && jf.status[i + 1].Equals(WaterLilyStatus.FREE)) //megvizsgaljuk 
+                    {                                                                       //h van e olyan eset h a bekanak van hova ugrania
+                        jf.status[i] = WaterLilyStatus.FREE;
+                        jf.status[i + 1] = WaterLilyStatus.TOAD;
+                        jf.Format(jf.Status());
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+        }
+
+        class XJump : Command
+        {
+            private JFShell jf;
+
+            public XJump(JFShell jf) : base("X")
+            {
+                this.jf = jf;
+            }
+
+            public override bool Execute(params string[] args)
+            {
+                if (args.Length != 1 || !(args[0].Equals("jump")))
+                {
+                    return false;
+                }
+                for(int i = 0; i < jf.status.Length - 2; i++)
+                {
+                    if(jf.status[i].Equals(WaterLilyStatus.TOAD) && jf.status[i+1].Equals(WaterLilyStatus.TREE_FROG) 
+                        && jf.status[i + 2].Equals(WaterLilyStatus.FREE))
+                    {
+                        jf.status[i] = WaterLilyStatus.FREE;
+                        jf.status[i + 2] = WaterLilyStatus.TOAD;
+                        jf.Format(jf.Status());
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+        public JFShell()
+        {
+            AddCommand(new New(this));
+            AddCommand(new XWalk(this));
+        }
+
+
+    }
+
+    
+
+    
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Shell sh = new JFShell();
+            sh.ReadEvalPrint();
+        }
+    }
+}
