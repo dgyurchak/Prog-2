@@ -6,6 +6,12 @@ public class Pont {
     public Pont(double x, double y) {
         this.x = x;
         this.y = y;
+        System.out.println("Két paraméteres");
+    }
+    
+    public Pont() {
+        this(0.0, 0.0);
+        System.out.println("Nulla paraméteres");
     }
 
     public Pont() {
@@ -33,7 +39,7 @@ public class Pont {
     }
     
     public double tavolsag(Pont p) {
-        return Math.sqrt(Math.pow(this.x-p.getX(),2)+Math.pow(y-p.getY(),2));
+        return Math.sqrt(Math.pow(this.x-p.getX(),2)+Math.pow(this.y-p.getY(),2));
     }
 
     public static double tavolsag(Pont p, Pont s) {
@@ -47,7 +53,7 @@ public class Pont {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof Pont)) {
+        if (obj == null || !(obj instanceof Pont)) {        //instanceof - pontnak a tipusa
             return false;
         }
         Pont tmp = (Pont)obj;
@@ -74,7 +80,7 @@ class Test2 {
         System.out.println(q);
         System.out.println(s.equals(q));
         System.out.println(s.equals(s));
-        System.out.println(Pont.tavolsag(s, q));
+        System.out.println(Pont.tavolsag(s, q));    //"metódus tultöltés"
         System.out.println(s.tavolsag(q));
         s.mozgatas(1.0, 1.0);
         System.out.println(s);
